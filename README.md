@@ -1526,6 +1526,23 @@ open coverage/index.html
 
 ### Load Testing
 
+#### Recommended: Run All Tests
+
+**Script**: `load-test-all.sh`
+
+**Purpose**: Runs comprehensive test first, then all dedicated tests using the same registered users.
+
+**Run**:
+```bash
+# Make executable (first time only)
+chmod +x load-test-all.sh
+
+# Run all load tests
+./load-test-all.sh
+```
+
+This will run comprehensive test, then prompts, subscription, and audio tests using the same users.
+
 #### Comprehensive Load Test
 
 **Script**: `load-test-comprehensive.sh`
@@ -1550,6 +1567,86 @@ NUM_USERS=50 REQUESTS_PER_USER=20 PROMPTS_PER_USER=10 ./load-test-comprehensive.
 - ✅ Prompt creation (5 prompts per user)
 - ✅ Audio retrieval
 - ✅ WebSocket notifications (requires Node.js)
+
+**Note**: At the end, it exports `USER_TOKENS` and `USER_IDS` to `/tmp/load-test-tokens.sh` for use in dedicated load tests.
+
+#### Dedicated Load Tests
+
+**Prompts Load Test** (`load-test-prompts.sh`):
+```bash
+# Make executable (first time only)
+chmod +x load-test-prompts.sh
+
+# Run prompts load test (will register new users if tokens not provided)
+./load-test-prompts.sh
+
+# Or use tokens from comprehensive test:
+source /tmp/load-test-tokens.sh  # After running load-test-comprehensive.sh
+./load-test-prompts.sh
+
+# Customize
+NUM_USERS=20 PROMPTS_PER_USER=30 CONCURRENT_REQUESTS=100 ./load-test-prompts.sh
+```
+
+**What It Tests**:
+- ✅ Create prompts (default: 20 per user)
+- ✅ List prompts with pagination
+- ✅ Get prompt by ID
+- ✅ Concurrent prompt creation (default: 50 requests)
+- ✅ Concurrent prompt listing (default: 50 requests)
+
+**Note**: If `USER_TOKENS` and `USER_IDS` environment variables are set, it will use those tokens instead of registering new users.
+
+**Subscription Load Test** (`load-test-subscription.sh`):
+```bash
+# Make executable (first time only)
+chmod +x load-test-subscription.sh
+
+# Run subscription load test (will register new users if tokens not provided)
+./load-test-subscription.sh
+
+# Or use tokens from comprehensive test:
+source /tmp/load-test-tokens.sh  # After running load-test-comprehensive.sh
+./load-test-subscription.sh
+
+# Customize
+NUM_USERS=50 REQUESTS_PER_USER=20 CONCURRENT_REQUESTS=100 ./load-test-subscription.sh
+```
+
+**What It Tests**:
+- ✅ Subscribe to PAID tier
+- ✅ Cancel subscriptions
+- ✅ Status checks (default: 10 per user)
+- ✅ Concurrent subscribe operations (default: 50 requests)
+- ✅ Concurrent status checks (default: 50 requests)
+- ✅ Subscribe/cancel cycles (5 cycles per user)
+
+**Note**: If `USER_TOKENS` and `USER_IDS` environment variables are set, it will use those tokens instead of registering new users.
+
+**Audio Load Test** (`load-test-audio.sh`):
+```bash
+# Make executable (first time only)
+chmod +x load-test-audio.sh
+
+# Run audio load test (will register new users if tokens not provided)
+./load-test-audio.sh
+
+# Or use tokens from comprehensive test:
+source /tmp/load-test-tokens.sh  # After running load-test-comprehensive.sh
+./load-test-audio.sh
+
+# Customize
+NUM_USERS=20 PROMPTS_PER_USER=10 CONCURRENT_REQUESTS=100 WAIT_FOR_PROCESSING=60 ./load-test-audio.sh
+```
+
+**What It Tests**:
+- ✅ List audio files with pagination
+- ✅ Get audio by ID
+- ✅ Update audio metadata
+- ✅ Concurrent audio listing (default: 50 requests)
+- ✅ Concurrent get by ID (default: 50 requests)
+
+**Note**: If `USER_TOKENS` and `USER_IDS` environment variables are set, it will use those tokens instead of registering new users.
 
 #### Rate Limiting Load Test
 

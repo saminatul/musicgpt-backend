@@ -400,15 +400,41 @@ echo ""
 echo -e "${GREEN}✅ Comprehensive load testing completed!${NC}"
 echo ""
 
-# Export user tokens and IDs for WebSocket testing
+# Export user tokens and IDs for WebSocket testing and dedicated load tests
 if [ ${#USER_TOKENS[@]} -gt 0 ]; then
-    echo "Exporting user data for WebSocket testing:"
+    TOKENS_STR=$(IFS=','; echo "${USER_TOKENS[*]}")
+    IDS_STR=$(IFS=','; echo "${USER_IDS[*]}")
+    
+    echo "Exporting user data for WebSocket testing and dedicated load tests:"
     echo "  USER_TOKENS=$(IFS=','; echo "${USER_TOKENS[*]}")"
     echo "  USER_IDS=$(IFS=','; echo "${USER_IDS[*]}")"
     echo ""
+    
+    # Export to environment file
+    EXPORT_FILE="/tmp/load-test-tokens.sh"
+    cat > "$EXPORT_FILE" << EOF
+# Load test tokens exported from comprehensive test
+export USER_TOKENS="$TOKENS_STR"
+export USER_IDS="$IDS_STR"
+EOF
+    
+    echo "✅ Tokens exported to: $EXPORT_FILE"
+    echo ""
+    echo "To use tokens in dedicated load tests, run:"
+    echo "  source $EXPORT_FILE"
+    echo "  ./load-test-prompts.sh"
+    echo "  ./load-test-subscription.sh"
+    echo "  ./load-test-audio.sh"
+    echo ""
+    echo "Or export manually:"
+    echo "  export USER_TOKENS=\"$TOKENS_STR\""
+    echo "  export USER_IDS=\"$IDS_STR\""
+    echo "  ./load-test-prompts.sh"
+    echo "  ./load-test-subscription.sh"
+    echo "  ./load-test-audio.sh"
+    echo ""
     echo "To test WebSocket connections, run:"
-    echo "  export USER_TOKENS=\"$(IFS=','; echo "${USER_TOKENS[*]}")\""
-    echo "  export USER_IDS=\"$(IFS=','; echo "${USER_IDS[*]}")\""
+    echo "  source $EXPORT_FILE"
     echo "  node test-websocket.js ${#USER_TOKENS[@]} $API_URL"
     echo ""
 fi
