@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  password           String
+  displayName        String    @map("display_name")
+  subscriptionStatus String    @default("FREE") @map("subscription_status") // FREE | PAID
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  prompts            Prompt[]
+  audios             Audio[]
+  refreshTokens      RefreshToken[]
+
+  @@map("users")
+}
+
+model Prompt {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  text      String
+  status    String   @default("PENDING") // PENDING | PROCESSING | COMPLETED
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  audio     Audio?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("prompts")
+}
+
+model Audio {
+  id        String   @id @default(uuid())
+  promptId  String   @unique @map("prompt_id")
+  userId    String   @map("user_id")
+  title     String
+  url       String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  prompt    Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([title])
+  @@map("audios")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
