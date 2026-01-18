@@ -3,11 +3,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json ./
+COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 
 # Install all dependencies (needed for build)
-RUN npm install
+RUN npm ci || npm install
 
 # Copy source code
 COPY . .
@@ -18,11 +18,18 @@ RUN npx prisma generate
 # Build application
 RUN npm run build
 
+# Fix build output structure if files are in dist/src instead of dist
+RUN if [ -d /app/dist/src ] && [ ! -f /app/dist/main.js ]; then \
+      echo "Moving files from dist/src to dist..." && \
+      mv /app/dist/src/* /app/dist/ && \
+      rmdir /app/dist/src 2>/dev/null || true; \
+    fi
+
 # Production stage
 FROM node:20-alpine
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+# Install curl for health checks and OpenSSL for Prisma
+RUN apk add --no-cache curl openssl libc6-compat
 
 WORKDIR /app
 

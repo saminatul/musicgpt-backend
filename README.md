@@ -179,7 +179,7 @@ src/
 
 3. **Start services**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
    This will start:
@@ -190,7 +190,9 @@ src/
 
 4. **Run database migrations**
    ```bash
-   docker-compose exec api npx prisma migrate deploy
+   docker compose exec api npx prisma migrate deploy
+   or
+   docker compose exec api npx prisma migrate dev
    ```
 
 5. **Access the application**
@@ -212,7 +214,7 @@ src/
 
 3. **Start PostgreSQL and Redis** (using Docker or locally)
    ```bash
-   docker-compose up -d postgres redis
+   docker compose up -d postgres redis
    ```
 
 4. **Run migrations**
@@ -1736,7 +1738,7 @@ The application includes comprehensive health check endpoints for container orch
 
 #### Docker Configuration
 
-**docker-compose.yml** includes health checks:
+**docker compose.yml** includes health checks:
 
 ```yaml
 api:
@@ -1813,16 +1815,16 @@ The application is Docker-ready with health checks and automatic restarts:
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # Check container health
 docker ps
 
 # View logs
-docker-compose logs -f api
+docker compose logs -f api
 
 # Stop services
-docker-compose down
+docker compose down
 ```
 
 ### Health Checks
